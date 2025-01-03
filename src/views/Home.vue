@@ -8,7 +8,13 @@
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="intro-text" v-animate-typing>
-          <h1>Hello, I'm <span class="highlight">Idris Bouargoub</span></h1>
+          <h1>Hello, I'm <span class="highlight animated-name">
+            <span v-for="(char, index) in 'Idris Bouargoub'" 
+                  :key="index" 
+                  :style="{ animationDelay: `${index * 0.1}s` }">
+              {{ char }}
+            </span>
+          </span></h1>
           <h2>Backend Developer & Computer Science Student</h2>
           <p class="typewriter">{{ typedText }}</p>
           <div class="social-links">
@@ -30,96 +36,76 @@
         </div>
       </section>
 
-      <!-- Skills Section -->
-      <section class="skills-section">
-        <h2 class="section-title glow-on-hover">Technical Arsenal</h2>
-        <div class="skills-grid">
-          <div
-            v-for="(category, index) in skills"
-            :key="index"
-            class="skill-category"
-            :class="{ visible: true }"
-            :style="{ animationDelay: `${index * 0.2}s` }"
-          >
-            <h3 class="category-title glow-on-hover">{{ category.name }}</h3>
-            <div class="skill-items">
-              <div
-                v-for="(skill, idx) in category.items"
-                :key="idx"
-                class="skill-item"
-              >
-                <div class="skill-header">
-                  <i :class="skill.icon"></i>
-                  <span>{{ skill.name }}</span>
-                </div>
-                <div class="skill-bar">
-                  <div
-                    class="skill-progress"
-                    :style="{ width: skill.level + '%' }"
-                  ></div>
-                </div>
+      <!-- About Me Section -->
+      <section class="about-section">
+        <h2 class="section-title glow-title">About Me</h2>
+        <div class="about-content">
+          <div class="about-text">
+            <p class="about-description">
+              I am a passionate Backend Developer with a strong foundation in Computer Science.
+              Currently pursuing my studies while working on exciting projects that challenge
+              and expand my technical capabilities. My focus lies in building scalable,
+              efficient backend solutions and exploring new technologies.
+            </p>
+            <div class="key-points">
+              <div class="point">
+                <i class="fas fa-code"></i>
+                <span>Clean Code Enthusiast</span>
               </div>
+              <div class="point">
+                <i class="fas fa-server"></i>
+                <span>Backend Specialist</span>
+              </div>
+              <div class="point">
+                <i class="fas fa-brain"></i>
+                <span>Problem Solver</span>
+              </div>
+            </div>
+          </div>
+          <div class="about-image">
+            <div class="image-frame">
+              <img src="@/assets/image0.jpeg" alt="Profile Picture" />
             </div>
           </div>
         </div>
       </section>
+
+      <!-- Skills Section -->
+      <TechGrid 
+        :skills="personalData.skills"
+        :sectionTitle="sectionTitles.skills"
+        @show-tech-logo="showTechLogo"
+      />
 
       <!-- Education Section -->
       <section class="education-section">
-        <h2 class="section-title glow-on-hover">Education Journey</h2>
-        <div class="education-card">
-          <div class="edu-icon">
-            <i class="fas fa-university"></i>
-          </div>
-          <div class="edu-details">
-            <h3>Higher Institute of Computer Science Medenine</h3>
-            <p>Computer Science</p>
-            <p>Tunisia</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Projects Section with Enhanced Animations -->
-      <section class="projects-section">
-        <h2 class="section-title glow-on-hover">Featured Projects</h2>
-        <div class="projects-grid">
-          <div
-            v-for="(project, index) in limitedProjects"
-            :key="index"
-            class="project-card"
+        <h2 class="section-title glow-title">{{ sectionTitles.education }}</h2>
+        <div class="education-cards">
+          <div 
+            v-for="(edu, index) in personalData.education" 
+            :key="index" 
+            class="education-card"
             :style="{ animationDelay: `${index * 0.2}s` }"
           >
-            <div class="project-content">
-              <h3>{{ project.title }}</h3>
-              <p>{{ project.description }}</p>
-              <div class="tech-stack">
-                <span
-                  v-for="tech in project.technologies"
-                  :key="tech"
-                  class="tech-tag"
-                  >{{ tech }}</span
-                >
-              </div>
-              <div class="project-links">
-                <a :href="project.github" target="_blank">
-                  <i class="fab fa-github"></i>
-                </a>
-                <a v-if="project.demo" :href="project.demo" target="_blank">
-                  <i class="fas fa-external-link-alt"></i>
-                </a>
-              </div>
+            <div class="edu-icon">
+              <i class="fas fa-university"></i>
+            </div>
+            <div class="edu-details">
+              <h3>{{ edu.school }}</h3>
+              <p class="degree">{{ edu.degree }}</p>
+              <p class="location">{{ edu.country }}</p>
+              <p class="period">{{ edu.period }}</p>
             </div>
           </div>
         </div>
-        <div v-if="hasMoreProjects" class="see-more-container">
-          <router-link to="/projects" class="see-more-btn">
-            See More Projects
-            <i class="fas fa-arrow-right"></i>
-          </router-link>
-        </div>
       </section>
-    </div>
 
+      <!-- Projects Section -->
+      <ProjectGrid 
+        :projects="projects"
+        :sectionTitle="sectionTitles.projects"
+      />
+    </div>
     <!-- Tech Logo Modal -->
     <transition name="fade">
       <div v-if="activeTech" class="tech-modal" @click="hideTechLogo">
@@ -133,65 +119,33 @@
 </template>
 
 <script>
+import { titleAnimation } from '@/mixins/titleAnimation';
 import { personalData } from '@/config/personalData';
+import ProjectGrid from '@/components/layouts/ProjectGrid.vue';
+import TechGrid from '@/components/layouts/TechGrid.vue';
 
 export default {
   name: "Home",
+  components: {
+    ProjectGrid,
+    TechGrid
+  },
+  mixins: [titleAnimation],
   data() {
     return {
+      sectionTitles: {
+        skills: "🛠️ Technical Arsenal",
+        education: "📚 Education Journey",
+        projects: "💼 Featured Projects"
+      },
       typedText: "",
       typewriterText:
         "Crafting robust backend solutions and elegant user experiences",
-      skills: {
-        backend: {
-          name: "Backend Development",
-          items: [
-            { name: "Spring Boot", level: 90, icon: "fab fa-java" },
-            { name: "ASP.NET Core", level: 85, icon: "fab fa-microsoft" },
-            { name: "Node.js", level: 80, icon: "fab fa-node-js" },
-            { name: "Python", level: 75, icon: "fab fa-python" },
-          ],
-        },
-        frontend: {
-          name: "Frontend Development",
-          items: [
-            { name: "Vue.js", level: 85, icon: "fab fa-vuejs" },
-            { name: "Android", level: 75, icon: "fab fa-android" },
-            { name: "React", level: 70, icon: "fab fa-react" },
-          ],
-        },
-        database: {
-          name: "Database & DevOps",
-          items: [
-            { name: "MySQL", level: 90, icon: "fas fa-database" },
-            { name: "MongoDB", level: 80, icon: "fas fa-database" },
-            { name: "Docker", level: 85, icon: "fab fa-docker" },
-            { name: "Git", level: 90, icon: "fab fa-git-alt" },
-          ],
-        },
-      },
-      projects: personalData.projects,  // Use projects from personalData
+      projects: personalData.projects,
       activeTech: null,
-      techLogos: {
-        "Spring Boot": {
-          logo: "https://spring.io/images/spring-logo-9146a4d3298760c2e7e49595184e1975.svg",
-          url: "https://spring.io/",
-        },
-        "Vue.js": {
-          logo: "https://vuejs.org/images/logo.png",
-          url: "https://vuejs.org/",
-        },
-        // Add more tech logos and URLs
-      },
+      techLogos: personalData.techLogos,
+      personalData,
     };
-  },
-  computed: {
-    limitedProjects() {
-      return this.projects.slice(0, 2);
-    },
-    hasMoreProjects() {
-      return this.projects.length > 2;
-    }
   },
   mounted() {
     this.typeWriter();
@@ -219,18 +173,18 @@ export default {
     },
     hideTechLogo() {
       this.activeTech = null;
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style scoped>
-/* Adding only new styles, keeping the color theme from UnderDevelopment.vue */
+/* Core styles */
 .portfolio-container {
   min-height: 100vh;
   width: 100vw;
   margin: 0;
-  padding: 60px 0 0 0; /* Add top padding for navbar */
+  padding: 60px 0 0 0;
   background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
   color: #64ffda;
   position: relative;
@@ -238,6 +192,7 @@ export default {
   perspective: 1000px;
 }
 
+/* Background and layout styles */
 .gradient-bg {
   position: fixed;
   top: 0;
@@ -252,6 +207,18 @@ export default {
   z-index: 1;
 }
 
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rem;
+}
+
+/* Hero section styles */
 .hero-section {
   min-height: calc(100vh - 60px); /* Account for navbar */
   padding: 2rem;
@@ -261,16 +228,6 @@ export default {
   text-align: center;
   position: relative;
   z-index: 2;
-}
-
-.skills-section,
-.education-section,
-.projects-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 4rem 0;
 }
 
 .intro-text h1 {
@@ -307,6 +264,16 @@ export default {
 .social-btn:hover {
   transform: translateY(-3px);
   filter: drop-shadow(0 0 10px rgba(100, 255, 218, 0.8));
+}
+
+/* Skills section styles */
+.skills-section,
+.education-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 0;
 }
 
 .section-title {
@@ -348,17 +315,6 @@ export default {
   .intro-text h2 {
     font-size: 1.5rem;
   }
-}
-
-.content-wrapper {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rem;
 }
 
 /* Enhanced Section Titles */
@@ -604,35 +560,258 @@ export default {
   }
 }
 
-.see-more-container {
-  margin-top: 2rem;
-  text-align: center;
+.education-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.see-more-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  background: transparent;
-  border: 2px solid #64ffda;
+.education-card {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.edu-details .degree {
   color: #64ffda;
-  border-radius: 5px;
-  text-decoration: none;
   font-size: 1.1rem;
+  margin: 0.5rem 0;
+}
+
+.edu-details .period {
+  color: #8892b0;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Animated Name Styles */
+.animated-name {
+  display: inline-flex;
+  color: #64ffda;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animated-name span {
+  display: inline-block;
+  animation: wave 2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Section Title Enhancement */
+.section-title {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  perspective: 1000px;
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(100, 255, 218, 0.8),
+                 0 0 30px rgba(100, 255, 218, 0.6),
+                 0 0 40px rgba(100, 255, 218, 0.4);
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px) rotate(5deg);
+  }
+}
+
+/* Enhanced hover effect for section titles */
+.section-title.glow-on-hover:hover {
+  transform: perspective(1000px) translateZ(50px);
+  text-shadow: 0 0 20px rgba(100, 255, 218, 0.8),
+               0 0 40px rgba(100, 255, 218, 0.4),
+               0 0 60px rgba(100, 255, 218, 0.2);
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .animated-name span {
+    animation: wave 2s ease-in-out infinite;
+    transform-origin: center;
+  }
+}
+
+/* Enhanced Section Title Styles */
+.section-title.glow-effect {
+  position: relative;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
   transition: all 0.3s ease;
 }
 
-.see-more-btn:hover {
-  background: rgba(100, 255, 218, 0.1);
-  transform: translateY(-3px);
+.section-title.glow-effect::before {
+  content: '';
+  position: absolute;
+  inset: -5px -20px;
+  background: radial-gradient(circle at center, 
+    rgba(100, 255, 218, 0.1), 
+    transparent 70%
+  );
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: -1;
+  border-radius: 8px;
 }
 
-.see-more-btn i {
+.section-title.glow-effect:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  text-shadow: 
+    0 0 10px rgba(100, 255, 218, 0.8),
+    0 0 20px rgba(100, 255, 218, 0.4),
+    0 0 30px rgba(100, 255, 218, 0.2);
+}
+
+.section-title.glow-effect:hover::before {
+  opacity: 1;
+}
+
+.section-title.glow-effect::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: #64ffda;
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(100, 255, 218, 0.4);
+}
+
+.section-title.glow-effect:hover::after {
+  width: 100px;
+}
+
+/* About Section Styles */
+.about-section {
+  width: 100%;
+  padding: 4rem 0;
+}
+
+.about-content {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.about-text {
+  flex: 1;
+  animation: fadeInLeft 1s ease;
+}
+
+.about-description {
+  color: #8892b0;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+
+.key-points {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.point {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #64ffda;
+}
+
+.point i {
+  font-size: 1.2rem;
+}
+
+.about-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  animation: fadeInRight 1s ease;
+}
+
+.image-frame {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.image-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #64ffda;
+  border-radius: 10px;
+  transform: translate(10px, 10px);
+  z-index: -1;
   transition: transform 0.3s ease;
 }
 
-.see-more-btn:hover i {
-  transform: translateX(5px);
+.image-frame:hover::before {
+  transform: translate(5px, 5px);
+}
+
+.image-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  filter: grayscale(50%);
+  transition: all 0.3s ease;
+}
+
+.image-frame:hover img {
+  filter: grayscale(0%);
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .about-content {
+    flex-direction: column-reverse;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+
+  .image-frame {
+    width: 250px;
+    height: 250px;
+  }
 }
 </style>

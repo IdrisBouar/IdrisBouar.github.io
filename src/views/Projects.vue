@@ -15,6 +15,10 @@
         >
           <div class="project-image">
             <img :src="getProjectImage(project)" :alt="project.title">
+            <div class="status-badge" :class="project.status">
+              {{ formatStatus(project.status) }}
+              <span class="pulse-dot" v-if="project.status === 'development'"></span>
+            </div>
             <div class="project-overlay">
               <h3>{{ project.title }}</h3>
               <p>Click to view details</p>
@@ -25,37 +29,58 @@
     </div>
 
     <!-- Project Details Modal -->
-    <transition name="modal">
+    <transition name="modal" appear>
       <div v-if="selectedProject" class="modal-overlay" @click="closeModal">
-        <div class="modal-content" @click.stop>
-          <button class="close-btn" @click="closeModal">
-            <i class="fas fa-times"></i>
-          </button>
-          
-          <h2>{{ selectedProject.title }}</h2>
-          <p class="project-description">{{ selectedProject.description }}</p>
-          
-          <div class="tech-stack">
-            <span v-for="tech in selectedProject.technologies" :key="tech" class="tech-tag">
-              {{ tech }}
-            </span>
+        <div class="modal-content glow-border floating" @click.stop>
+          <div class="modal-header">
+            <div class="modal-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <button class="close-btn neon-hover" @click="closeModal" aria-label="Close">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
+          
+          <div class="modal-body">
+            <h2 class="modal-title glitch" :data-text="selectedProject.title">
+              {{ selectedProject.title }}
+            </h2>
+            
+            <p class="project-description fade-in-up">{{ selectedProject.description }}</p>
+            
+            <div class="tech-stack animated-tags">
+              <span 
+                v-for="(tech, index) in selectedProject.technologies" 
+                :key="tech" 
+                class="tech-tag bounce-in"
+                :style="{ animationDelay: `${index * 0.1}s` }"
+              >
+                {{ tech }}
+              </span>
+            </div>
 
-          <div class="project-links">
-            <a v-if="selectedProject.github" 
-               :href="selectedProject.github" 
-               target="_blank"
-               class="project-link">
-              <i class="fab fa-github"></i>
-              View on GitHub
-            </a>
-            <a v-if="selectedProject.demo" 
-               :href="selectedProject.demo" 
-               target="_blank"
-               class="project-link">
-              <i class="fas fa-external-link-alt"></i>
-              Live Demo
-            </a>
+            <div class="project-links fade-in-up">
+              <a v-if="selectedProject.github" 
+                 :href="selectedProject.github" 
+                 target="_blank"
+                 class="project-link shine-hover">
+                <i class="fab fa-github"></i>
+                <span class="link-text">View on GitHub</span>
+              </a>
+              <span v-else class="project-link disabled shine-hover">
+                <i class="fas fa-lock pulse"></i>
+                <span class="link-text">Source code private</span>
+              </span>
+              <a v-if="selectedProject.demo" 
+                 :href="selectedProject.demo" 
+                 target="_blank"
+                 class="project-link shine-hover">
+                <i class="fas fa-external-link-alt"></i>
+                <span class="link-text">Live Demo</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -76,14 +101,21 @@ export default {
   },
   methods: {
     getProjectImage(project) {
-      // You can add project images to your assets and return them based on project title
-      return `https://picsum.photos/400/300?random=${project.title.length}` // Placeholder images
+      try {
+        return require(`@/assets/projects/${project.image}`);
+      } catch (e) {
+        // Fallback to placeholder if image not found
+        return `https://picsum.photos/400/300?random=${project.title.length}`;
+      }
     },
     showProjectDetails(project) {
       this.selectedProject = project
     },
     closeModal() {
       this.selectedProject = null
+    },
+    formatStatus(status) {
+      return status.charAt(0).toUpperCase() + status.slice(1);
     }
   }
 }
@@ -156,6 +188,7 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .project-overlay {
@@ -191,7 +224,10 @@ export default {
 }
 
 .modal-content {
-  background: #112240;
+  background: linear-gradient(145deg, #112240 0%, #0a192f 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 255, 218, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   padding: 2rem;
   border-radius: 10px;
   max-width: 600px;
@@ -253,6 +289,68 @@ export default {
   transform: translateY(-3px);
 }
 
+.project-link.disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: rgba(137, 146, 176, 0.1);
+  border-color: #8892b0;
+  color: #8892b0;
+}
+
+.project-link.disabled:hover {
+  transform: none;
+  background: rgba(137, 146, 176, 0.1);
+}
+
+.status-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+.status-badge.finished {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border: 1px solid #2ecc71;
+}
+
+.status-badge.development {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #e74c3c;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Animations */
 @keyframes fadeInUp {
   to {
@@ -292,6 +390,158 @@ export default {
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+/* Enhanced Modal Styles */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.modal-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(100, 255, 218, 0.5);
+}
+
+.modal-dots span:nth-child(1) { background: #ff5f57; }
+.modal-dots span:nth-child(2) { background: #ffbd2e; }
+.modal-dots span:nth-child(3) { background: #28c93f; }
+
+.modal-body {
+  padding: 0 1rem;
+}
+
+/* Glitch effect for title */
+.glitch {
+  position: relative;
+  color: #64ffda;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 900px, 0, 0);
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -1px 0 #ff00ff;
+  animation: glitch-effect 3s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: 2px 0 #00ffff;
+  animation: glitch-effect 2s infinite linear alternate-reverse;
+}
+
+/* Floating animation for modal */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+/* Bounce animation for tech tags */
+.bounce-in {
+  animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+/* Enhanced link styles */
+.project-link {
+  position: relative;
+  overflow: hidden;
+  background: rgba(100, 255, 218, 0.05);
+}
+
+.link-text {
+  position: relative;
+  z-index: 1;
+}
+
+.project-link.shine-hover::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(100, 255, 218, 0.2),
+    transparent
+  );
+  transform: rotate(45deg);
+  transition: 0.5s;
+  opacity: 0;
+}
+
+.project-link.shine-hover:hover::before {
+  animation: shine 0.8s;
+}
+
+/* Pulse animation for lock icon */
+.pulse {
+  animation: iconPulse 2s infinite;
+}
+
+/* New Animations */
+@keyframes glitch-effect {
+  0% { clip: rect(44px, 900px, 56px, 0); }
+  5% { clip: rect(12px, 900px, 76px, 0); }
+  10% { clip: rect(59px, 900px, 98px, 0); }
+  15% { clip: rect(29px, 900px, 24px, 0); }
+  20% { clip: rect(16px, 900px, 37px, 0); }
+  100% { clip: rect(67px, 900px, 89px, 0); }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 0.9; transform: scale(1.1); }
+  80% { opacity: 1; transform: scale(0.89); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
+@keyframes iconPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Enhanced transitions */
+.modal-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0. 4, 0, 0.2, 1);
 }
 
 /* Responsive Design */

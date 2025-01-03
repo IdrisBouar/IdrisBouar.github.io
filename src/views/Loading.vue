@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { personalData } from "@/data/personalData";
+import { personalData } from "@/config/personalData";
 
 export default {
   name: "Loading",

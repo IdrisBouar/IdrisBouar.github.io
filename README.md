@@ -2,7 +2,7 @@
 
 > A modern, cyberpunk-themed portfolio website built with Vue.js, featuring animated tech stack visualization and futuristic UI elements.
 
-![Portfolio Preview](./public/preview.png)
+![Portfolio Preview](./public/readme.gif)
 
 ## 🚀 Live Demo
 Visit the live portfolio: [https://idrisbouar.github.io/portfolio](https://idrisbouar.github.io/portfolio)

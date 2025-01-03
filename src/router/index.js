@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Home from '@/views/Home'
 
 const routes = [
@@ -9,8 +9,9 @@ const routes = [
         meta: {
             layout: 'blank',
             hideNavigation: true,  // Add this flag
-            title: 'Loading',
-            description: 'Loading Page'
+            title: '🚀 Loading...',
+            description: 'Loading Page',
+            emoji: '🚀'
         }
     },
     {
@@ -19,8 +20,9 @@ const routes = [
         component: () => import('@/views/Home.vue'),
         meta: {
             layout: 'default',
-            title: 'Home',
-            description: 'Portfolio Home Page'
+            title: '🏠 Idris Bouargoub | Portfolio',
+            description: 'Portfolio Home Page',
+            emoji: '🏠'
         }
 
     },
@@ -39,8 +41,9 @@ const routes = [
         name: 'Projects',
         component: () => import('@/views/Projects.vue'),
         meta: {
-            title: 'Projects',
-            description: 'My Portfolio Projects'
+            title: '💻 My Projects',
+            description: 'My Portfolio Projects',
+            emoji: '💻'
         }
     },
     {
@@ -48,8 +51,9 @@ const routes = [
         name: 'About',
         component: () => import('@/views/About.vue'),
         meta: {
-            title: 'About Me',
-            description: 'Learn more about me'
+            title: '👨‍💻 About Me',
+            description: 'Learn more about me',
+            emoji: '👨‍💻'
         }
     },
     {
@@ -57,14 +61,15 @@ const routes = [
         name: 'Contact',
         component: () => import('@/views/Contact.vue'),
         meta: {
-            title: 'Contact Me',
-            description: 'Get in touch with me'
+            title: '📧 Contact Me',
+            description: 'Get in touch with me',
+            emoji: '📧'
         }
     }
 ];
 
 const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes
 });
 
@@ -80,5 +85,12 @@ router.beforeEach((to, from, next) => {
         next();
     }
 });
+
+// Navigation guard to handle title changes
+router.beforeEach((to, from, next) => {
+    // Update page title
+    document.title = to.meta.title || 'Idris Bouargoub | Portfolio'
+    next()
+})
 
 export default router
